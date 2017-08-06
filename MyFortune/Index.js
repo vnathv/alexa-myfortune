@@ -1,67 +1,83 @@
 ﻿'use strict'
 var http = require('http');
 
+var APP_ID = 'amzn1.ask.skill.99913c87-366f-4eb4-8ef1-2b8c035bf864';
+
 exports.handler = function (event, context) {
-    var request = event.request;
 
-    if (request.type === "LaunchRequest") {
-        context.succeed(buildResponse({
-            speechText: "Welcome to my fortune. What is the zodiac you want to check fortune today?",
-            repromptText: "You can say for example, How will be the day for aries today.",
-            endSession: false
-        }));
-    }
-    else if (request.type === "IntentRequest") {
-        let options = {};
-        let sign = request.intent.slots.zodiac.value;
+    try {
 
-        //Check sign is valid
-        if (sign === "undefined" || sign === undefined || sign === null) {
-            options.speechText = " hmmm you have forgotten to tell your zodiac sign . What is your zodiac sign?"
-            options.endSession = false;
-            context.succeed(buildResponse(options));
+        if (APP_ID !== '' && event.session.application.applicationId !== APP_ID) {
+            context.fail('Invalid Application ID');
         }
 
-        if (!ValidateZodiacSign(sign)) {
-            options.speechText = ` The Zoadiac sign ${sign} is not a valid one. Please tell a valid zodiac sign .`
-            options.endSession = false;
-            context.succeed(buildResponse(options));
+        var request = event.request;
+
+        if (request.type === "LaunchRequest") {
+            context.succeed(buildResponse({
+                speechText: "Welcome to my fortune. What is the zodiac you want to check fortune today?",
+                repromptText: "You can say for example, How will be the day for aries today.",
+                endSession: false
+            }));
+        }
+        else if (request.type === "IntentRequest") {
+            let options = {};
+            let sign = request.intent.slots.zodiac.value;
+
+            //Check sign is valid
+            if (sign === undefined || sign === null) {
+                options.speechText = " hmmm you have forgotten to tell your zodiac sign . What is your zodiac sign?"
+                options.endSession = false;
+                context.succeed(buildResponse(options));
+                return;
+            }
+
+            if (!ValidateZodiacSign(sign)) {
+                options.speechText = ` The Zoadiac sign ${sign} is not a valid one. Please tell a valid zodiac sign .`
+                options.endSession = false;
+                context.succeed(buildResponse(options));
+            }
+
+
+            if (request.intent.name === "MyFortuneIntent") {
+
+                findMyFortune(sign, function (todaysFortune, error) {
+                    if (error) {
+                        context.fail(error);
+                        options.speechText = "There has been a problem with the request."
+                        options.endSession = true;
+                        context.succeed(buildResponse(options));
+                    } else {
+                        options.speechText = todaysFortune
+                        options.speechText += " . Have a nice day ahead . "
+                        options.sign = sign
+                        options.cardText = todaysFortune
+                        options.endSession = true;
+                        context.succeed(buildResponse(options));
+                    }
+                });
+
+            } else if (request.intent.name === "AMAZON.StopIntent" || request.intent.name === "AMAZON.CancelIntent") {
+                options.endSession = true;
+            }
+            else if (request.type === "SessionEndedRequest") {
+                options.endSession = true;
+                context.succeed();
+            }
+            else {
+                context.fail("Unknown Intent")
+            }
         }
 
 
-        if (request.intent.name === "MyFortuneIntent") {
-
-            findMyFortune(sign, function (todaysFortune, error) {
-                if (error) {
-                    context.fail(error);
-                    options.speechText = "There has been a problem with the request."
-                    options.endSession = true;
-                    context.succeed(buildResponse(options));
-                } else {
-                    options.speechText = todaysFortune
-                    options.speechText += " . Have a nice day ahead . "
-                    options.sign = sign
-                    options.cardText = todaysFortune
-                    options.endSession = true;
-                    context.succeed(buildResponse(options));
-                }
-            });
-
-        } else if (request.intent.name === "AMAZON.StopIntent" || request.intent.name === "AMAZON.CancelIntent") {
-            options.endSession = true;
-        }
-        else if (request.type === "SessionEndedRequest") {
-            options.endSession = true;
-        }
         else {
-            context.fail("Unknown Intent")
+            context.fail("Unknown Intent type")
         }
+
+    } catch (e) {
+        context.fail(e.message)
     }
 
-
-    else {
-        context.fail("Unknown Intent type")
-    }
 
 }
 
@@ -93,8 +109,8 @@ function buildResponse(options) {
             "text": options.cardText,
         }
         response.response.card.image = {
-            "smallImageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-P3eM2RJwwAmp5Obb9eBkWhHyx4GMMRMXHd2NZ86JPVWMelXYRw",
-            "largeImageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-P3eM2RJwwAmp5Obb9eBkWhHyx4GMMRMXHd2NZ86JPVWMelXYRw"
+            "smallImageUrl": "https://s3.amazonaws.com/myfortunezodiacsign/Zodiac.jpg",
+            "largeImageUrl": "https://s3.amazonaws.com/myfortunezodiacsign/Zodiac.jpg"
         }
     }
     return response;
@@ -103,32 +119,29 @@ function buildResponse(options) {
 function findMyFortune(sign, callBack) {
     console.log("sign is " + sign)
     var url = `http://horoscope-api.herokuapp.com/horoscope/today/${sign}`;
-    try {
-        var req = http.get(url, (res) => {
-            var body = "";
 
-            res.on("data", (chunk) => {
-                body += chunk
-            });
+    var req = http.get(url, (res) => {
+        var body = "";
 
-            res.on("end", () => {
-                var horoscope = JSON.parse(body);
-                var horoscopeText = horoscope.horoscope;
-                horoscopeText = horoscopeText
-                    .replace(/(\\n|\\r)/g, '')
-                    .replace(/[^a-zA-Z0-9.\d\s]+/gi, "")
-                    .trim();
-
-                console.log(horoscopeText)
-                callBack(horoscopeText)
-            });
-        }).on("error", (error) => {
-            callBack(err);
+        res.on("data", (chunk) => {
+            body += chunk
         });
 
-    } catch (error) {
-        //callBack(error);
-    }
+        res.on("end", () => {
+            var horoscope = JSON.parse(body);
+            var horoscopeText = horoscope.horoscope;
+            horoscopeText = horoscopeText
+                .replace(/(\\n|\\r)/g, '')
+                .replace(/[^a-zA-Z0-9.\d\s]+/gi, "")
+                .trim();
+
+            console.log(horoscopeText)
+            callBack(horoscopeText)
+        });
+    }).on("error", (error) => {
+        callBack(err);
+    });
+
 
 
 }
