@@ -13,12 +13,22 @@ exports.handler = function (event, context) {
     }
     else if (request.type === "IntentRequest") {
         let options = {};
-        let sign = request.intent.slots.ZODIAC.value;
+        let sign = request.intent.slots.zodiac.value;
+
+        //Check sign is valid
         if (sign === "undefined" || sign === undefined || sign === null) {
             options.speechText = " hmmm you have forgotten to tell your zodiac sign . What is your zodiac sign?"
             options.endSession = false;
             context.succeed(buildResponse(options));
         }
+
+        if (!ValidateZodiacSign(sign)) {
+            options.speechText = ` The Zoadiac sign ${sign} is not a valid one. Please tell a valid zodiac sign .`
+            options.endSession = false;
+            context.succeed(buildResponse(options));
+        }
+
+
         if (request.intent.name === "MyFortuneIntent") {
 
             findMyFortune(sign, function (todaysFortune, error) {
@@ -117,9 +127,19 @@ function findMyFortune(sign, callBack) {
         });
 
     } catch (error) {
-        // callBack(error);
+        //callBack(error);
     }
 
 
 }
 
+function ValidateZodiacSign(zodiacSign) {
+
+    let zodiacSigns = ['aries', 'leo', 'sagittarius', 'taurus', 'virgo', 'capricorn', 'gemini', 'libra', 'aquarius', 'cancer', 'scorpio', 'pisces'];
+
+    if (zodiacSigns.indexOf(zodiacSign.toLowerCase()) > -1) {
+        return true;
+    } else {
+        return false;
+    }
+}
