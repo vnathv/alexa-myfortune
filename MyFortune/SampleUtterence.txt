@@ -1,0 +1,8 @@
+﻿MyFortuneIntent How would be the day for {zodiac} today
+MyFortuneIntent How about {zodiac} today
+MyFortuneIntent How about {zodiac}
+MyFortuneIntent Tell fortune for {zodiac} today
+MyFortuneIntent what is the fortune for {zodiac} today
+MyFortuneIntent fortune for {zodiac} today
+MyFortuneIntent about {zodiac} today
+MyFortuneIntent {zodiac}

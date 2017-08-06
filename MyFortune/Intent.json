@@ -1,0 +1,13 @@
+﻿{
+  "intents": [
+    {
+      "intent": "MyFortune",
+      "slots": [
+        {
+          "name": "zodiac",
+          "type": "ZODIAC"
+        }
+      ]
+    }
+  ]
+}

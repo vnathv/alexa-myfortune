@@ -1,0 +1,9 @@
+{
+  "name": "my-fortune",
+  "version": "0.0.0",
+  "description": "MyFortune",
+  "main": "server.js",
+  "author": {
+    "name": "vijay"
+  }
+}
