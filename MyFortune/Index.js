@@ -36,6 +36,7 @@ exports.handler = function (event, context) {
                 options.speechText = ` The Zoadiac sign ${sign} is not a valid one. Please tell a valid zodiac sign .`
                 options.endSession = false;
                 context.succeed(buildResponse(options));
+                return;
             }
 
 
@@ -109,8 +110,8 @@ function buildResponse(options) {
             "text": options.cardText,
         }
         response.response.card.image = {
-            "smallImageUrl": "https://s3.amazonaws.com/myfortunezodiacsign/Zodiac.jpg",
-            "largeImageUrl": "https://s3.amazonaws.com/myfortunezodiacsign/Zodiac.jpg"
+            "smallImageUrl": "https://s3.amazonaws.com/myfortunezodiacsign/ZodiacSmall.jpg",
+            "largeImageUrl": "https://s3.amazonaws.com/myfortunezodiacsign/ZodiacLarge.jpg"
         }
     }
     return response;
