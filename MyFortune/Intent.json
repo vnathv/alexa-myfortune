@@ -1,13 +1,19 @@
 ﻿{
   "intents": [
     {
-      "intent": "MyFortune",
       "slots": [
         {
           "name": "zodiac",
-          "type": "ZODIAC"
+          "type": "zodiac"
         }
-      ]
+      ],
+      "intent": "MyFortuneIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
     }
   ]
 }

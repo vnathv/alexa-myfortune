@@ -32,10 +32,10 @@
     <Compile Include="Index.js">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Intent.js">
-      <SubType>Code</SubType>
-    </Compile>
     <Content Include="CustomSlotType.txt">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Intent.json">
       <SubType>Code</SubType>
     </Content>
     <Content Include="package.json" />
