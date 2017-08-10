@@ -15,32 +15,36 @@ exports.handler = function (event, context) {
 
         if (request.type === "LaunchRequest") {
             context.succeed(buildResponse({
-                speechText: "Welcome to my fortune. What is the zodiac you want to check fortune today?",
+                speechText: "Welcome to my fortune. What is the zodiac sign you want to check fortune today?",
                 repromptText: "You can say for example, How will be the day for aries today.",
                 endSession: false
             }));
-        }
+        } 
         else if (request.type === "IntentRequest") {
-            let options = {};
-            let sign = request.intent.slots.zodiac.value;
-
-            //Check sign is valid
-            if (sign === undefined || sign === null) {
-                options.speechText = " hmmm you have forgotten to tell your zodiac sign . What is your zodiac sign?"
-                options.endSession = false;
-                context.succeed(buildResponse(options));
-                return;
-            }
-
-            if (!ValidateZodiacSign(sign)) {
-                options.speechText = ` The Zoadiac sign ${sign} is not a valid one. Please tell a valid zodiac sign .`
-                options.endSession = false;
-                context.succeed(buildResponse(options));
-                return;
-            }
+            let options = {};         
 
 
             if (request.intent.name === "MyFortuneIntent") {
+
+                if (request.intent.slots.zodiac !== undefined)
+                    var sign = request.intent.slots.zodiac.value;
+
+
+                //Check sign is valid
+                if (sign === undefined || sign === null) {
+                    options.speechText = " hmmm you have forgotten to tell your zodiac sign . What is your zodiac sign?"
+                    options.endSession = false;
+                    context.succeed(buildResponse(options));
+                    return;
+                }
+
+                if (request.intent.slots.zodiac !== undefined && !ValidateZodiacSign(sign)) {
+                    options.speechText = ` The Zoadiac sign ${sign} is not a valid one. Please tell a valid zodiac sign .`
+                    options.endSession = false;
+                    context.succeed(buildResponse(options));
+                    return;
+                }
+
 
                 findMyFortune(sign, function (todaysFortune, error) {
                     if (error) {
@@ -59,18 +63,25 @@ exports.handler = function (event, context) {
                 });
 
             } else if (request.intent.name === "AMAZON.StopIntent" || request.intent.name === "AMAZON.CancelIntent") {
+                options.speechText = "ok, good bye."
                 options.endSession = true;
+                context.succeed(buildResponse(options));
             }
-            else if (request.type === "SessionEndedRequest") {
-                options.endSession = true;
-                context.succeed();
+             else if (request.intent.name === "AMAZON.HelpIntent") {
+                options.speechText = "My fortune will forecast the day, based on zodiac sign. For example, you can ask what is the fortune for Aquarius today, to know about the day for the zodiac sign Aquarius. Please refer to skill description for all possible utterences. What is the zodiac sign you want to know today's fortune?.";
+                options.repromptText = "What is the zodiac sign you want to know fortune about today? If you want to exit from my fortune skill please say stop or cancel."
+                options.endSession = false;
+                context.succeed(buildResponse(options));
             }
             else {
                 context.fail("Unknown Intent")
             }
         }
 
-
+        else if (request.type === "SessionEndedRequest") {
+            options.endSession = true;
+            context.succeed();
+        }
         else {
             context.fail("Unknown Intent type")
         }
@@ -118,7 +129,7 @@ function buildResponse(options) {
 }
 
 function findMyFortune(sign, callBack) {
-    console.log("sign is " + sign)
+   
     var url = `http://horoscope-api.herokuapp.com/horoscope/today/${sign}`;
 
     var req = http.get(url, (res) => {
@@ -135,16 +146,12 @@ function findMyFortune(sign, callBack) {
                 .replace(/(\\n|\\r)/g, '')
                 .replace(/[^a-zA-Z0-9.\d\s]+/gi, "")
                 .trim();
-
-            console.log(horoscopeText)
+            
             callBack(horoscopeText)
         });
     }).on("error", (error) => {
         callBack(err);
     });
-
-
-
 }
 
 function ValidateZodiacSign(zodiacSign) {

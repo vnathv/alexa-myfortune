@@ -2,7 +2,18 @@
 MyFortuneIntent How about {zodiac} today
 MyFortuneIntent How about {zodiac}
 MyFortuneIntent Tell fortune for {zodiac} today
+MyFortuneIntent to tell about {zodiac} today
 MyFortuneIntent what is the fortune for {zodiac} today
 MyFortuneIntent fortune for {zodiac} today
 MyFortuneIntent about {zodiac} today
 MyFortuneIntent {zodiac}
+AMAZON.StopIntent stop
+AMAZON.StopIntent stop please
+AMAZON.CancelIntent cancel
+AMAZON.CancelIntent cancel please
+AMAZON.HelpIntent help
+AMAZON.HelpIntent help please
+AMAZON.HelpIntent help needed
+AMAZON.HelpIntent will you help me
+AMAZON.HelpIntent help required
+
