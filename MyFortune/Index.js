@@ -1,7 +1,7 @@
 ﻿'use strict'
 var http = require('http');
 
-var APP_ID = 'amzn1.ask.skill.99913c87-366f-4eb4-8ef1-2b8c035bf864';
+var APP_ID = 'amzn1.ask.skill.****-****-***-****';
 
 exports.handler = function (event, context) {
 
